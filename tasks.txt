@@ -1,2 +1,3 @@
 1 create a basic project structure and write docs for user
 2 finish docs for user
+3 implement crud for user

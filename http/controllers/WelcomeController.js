@@ -2,18 +2,9 @@ const UserModel = require(APP_PATH + '/models/UserModel')
 
 class WelcomeController {
   static async home(req, res) {
-    let pageContent = await require('fs').promises.readFile(APP_PATH + '/views/index.html')
-    pageContent = pageContent.toString().trim()
 
-    const userId = req.urlInfo.searchParams.get('user') || '0'
-    const user = new UserModel().getById(userId)
-
-    //template
-
-    const readyContent = pageContent.replace(/%([a-zA-Z]+)%/g, (_, sub) => user[sub])
-
-    res.writeHead(200)
-    res.end(readyContent)
+    res.writeHead(200, {'Content-type': 'text/html'})
+    res.end('<strong>Welcome</strong>')
   }
 
   static notFound(req, res) {

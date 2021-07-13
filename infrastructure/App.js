@@ -11,6 +11,8 @@ class App {
    */
   _frontController
 
+  _container = {}
+
   /**
    * @param {ILogger} logger
    */
@@ -23,6 +25,12 @@ class App {
   }
 
   init() {
+    const self = this
+    global.app = {
+      get (reference) {
+        return self.get(reference)
+      }
+    }
 
     // getting routeList
     this._routeList = fs.readdirSync(APP_PATH + '/routes')
@@ -39,12 +47,18 @@ class App {
     // front controller
     this._frontController = new (require(APP_PATH + '/infrastructure/FrontController'))(this._router)
 
+    //ioc
+    this._container['dbAccessor'] = new (require(APP_PATH + '/infrastructure/FSDBAccessor'))()
+    this._container['UserModel'] = new (require(APP_PATH + '/models/UserModel'))(app.get('dbAccessor'))
     return this
   }
 
   boot() {
 
-    this._router.set('default', this._router.resolve('get **404'))
+    this._router.set('default', this._router.get('get **404'))
+
+    //init models
+    this._container['UserModel'].init()
 
     // set handler of http for server
     this._http = require('http').createServer(this._frontController.handle.bind(this._frontController))
@@ -62,6 +76,8 @@ class App {
     if('logger' === reference) {
       return this._logger
     }
+
+    return this._container[reference] || undefined
   }
 }
 

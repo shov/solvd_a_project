@@ -7,22 +7,7 @@ global.APP_PATH = nodePath.resolve(__dirname)
 const logger = new (require(APP_PATH + '/infrastructure/ConsoleLogger'))()
 
 //env
-try {
-  const fs = require('fs')
-  const envExp = /^(?<name>[^#][^[#=]*)\s*=\s*(?<value>[^=#]+).*$/
-
-  fs.readFileSync(APP_PATH + '/.env').toString().trim().split('\n').forEach(line => {
-    const matches = line.match(envExp)
-    if (!matches) {
-      return
-    }
-
-    process.env[matches.groups.name.trim()] = matches.groups.value.trim()
-  })
-} catch (e) {
-  logger.error(e)
-  process.exit(1)
-}
+require('dotenv').config({path: APP_PATH + '/.env'})
 
 
 /** @type {App} */
