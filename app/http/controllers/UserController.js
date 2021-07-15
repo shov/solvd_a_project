@@ -11,7 +11,7 @@ class UserController {
 
       res.writeHead(200, {'Content-type': 'application/json'})
       res.end(JSON.stringify({
-        users: userList.map(u => ({id: u.id}))
+        users: userList.map(u => ({id: u.id, email: u.email}))
       }))
     })
   }

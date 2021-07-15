@@ -12,7 +12,7 @@ class Router {
     routeList.forEach(route => {
       const sign = this.makeSign(route.method, route.path)
 
-      const controller = require(APP_PATH + '/http/controllers/' + route.resolver.controller)
+      const controller = require(APP_PATH + '/app/http/controllers/' + route.resolver.controller)
       if ('function' !== typeof controller[route.resolver.action]) {
         throw new Error(`No action found for ${route.resolver.controller}`)
       }

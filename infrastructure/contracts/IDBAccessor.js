@@ -26,6 +26,10 @@ class IDBAccessor {
   async update(name, data) {
     throw new Error('Implement it!')
   }
+
+  async truncate(name) {
+    throw new Error('Implement it!')
+  }
 }
 
 module.exports = IDBAccessor

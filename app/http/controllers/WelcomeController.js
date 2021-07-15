@@ -1,4 +1,4 @@
-const UserModel = require(APP_PATH + '/models/UserModel')
+const UserModel = require(APP_PATH + '/app/models/UserModel')
 
 class WelcomeController {
   static async home(req, res) {

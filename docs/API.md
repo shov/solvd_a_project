@@ -31,7 +31,8 @@ Response example
 {
     "users": [
         {
-            "id": 1
+            "id": 1,
+            "email": "exampl@exa.mpl"
         }
     ]
 }
