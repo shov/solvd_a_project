@@ -23,11 +23,10 @@ class DependencyInjector {
 
       const dependencies = []
       const content = fs.readFileSync(filePath).toString().trim()
-      const depExp = /@Inject\s+(?<deps>[^\s].+)$/m
-      const depMatches = content.match(depExp)
-      if (depMatches) {
-        depMatches.groups.deps.split(/\s+/).map(r => r.trim()).forEach(r => dependencies.push(r))
-      }
+      const depExp = /@Inject\s*\(\s*(?<dep>[^\s].+)\s*\).*$/mg
+      content.replace(depExp, (_, dep) => {
+        dependencies.push(dep.trim())
+      })
 
       const reference = (base ? base + '.' : '') + matches.groups.reference.replace(/\//g, '.')
 
