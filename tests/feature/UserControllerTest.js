@@ -8,8 +8,9 @@ describe('UserController', () => {
   let user
 
   beforeAll(async () => {
+    jest.setTimeout(100000)
     request = supertest(app.get('http'))
-    user = app.get("UserModel")
+    user = app.get('app.models.UserModel')
   })
 
   beforeEach(async () => {

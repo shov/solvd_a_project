@@ -1,10 +1,12 @@
 const ValidationError = require(APP_PATH + '/infrastructure/exceptions/ValidationError')
 
 class UserModel {
-  /**
-   * @param {IDBAccessor} dbAccessor
-   */
+  '@Inject (dbAccessor)'
   constructor(dbAccessor) {
+    /**
+     * @type {IDBAccessor}
+     * @private
+     */
     this._dbAccessor = dbAccessor
     this._name = 'users'
     this._hadIntit = false

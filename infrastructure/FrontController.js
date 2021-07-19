@@ -1,23 +1,30 @@
 class FrontController {
   /**
-   * @param {Router} router
+   * @type {Router|null}
+   * @private
    */
-  constructor(router) {
-    /**
-     * @type {Router}
-     * @private
-     */
+  _router = null
+
+  setRouter(router) {
     this._router = router
   }
 
+  getRouter() {
+    return this._router
+  }
+
   async handle(req, res) {
+    if(!this._router) {
+      throw new Error(`Ropunter must be set before handling HTTP request!`)
+    }
+
     const urlInfo = new (require('url')).URL(req.url, `http://${req.headers.host}`)
     const sign = this._router.makeSign(req.method, urlInfo.pathname)
 
     req.params = {}
 
     let handler = this._router.resolve(sign, req) || this._router.resolve('default')
-    if('function' !== typeof handler) {
+    if ('function' !== typeof handler) {
       res.writeHead(404)
       res.end('NOT FOUND')
       return
@@ -43,7 +50,7 @@ class FrontController {
 
     req.urlInfo = urlInfo
     const result = handler(req, res)
-    if(result instanceof Promise) {
+    if (result instanceof Promise) {
       await result
     }
   }

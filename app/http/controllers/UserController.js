@@ -2,12 +2,18 @@ const NotFoundError = require(APP_PATH + '/infrastructure/exceptions/NotFoundErr
 const ValidationError = require(APP_PATH + '/infrastructure/exceptions/ValidationError')
 
 class UserController {
-  static async list(req, res) {
-    await UserController._wrapHandler(req, res, async () => {
-      /** @type {UserModel} */
-      const userModel = app.get('UserModel')
+  '@Inject (app.models.UserModel)'
+  constructor(userModel) {
+    /**
+     * @type {UserModel}
+     * @private
+     */
+    this._userModel = userModel
+  }
 
-      const userList = await userModel.fetchAll()
+  async list(req, res) {
+    await this._wrapHandler(req, res, async () => {
+      const userList = await this._userModel.fetchAll()
 
       res.writeHead(200, {'Content-type': 'application/json'})
       res.end(JSON.stringify({
@@ -16,17 +22,14 @@ class UserController {
     })
   }
 
-  static async create(req, res) {
-    await UserController._wrapHandler(req, res, async () => {
-      /** @type {UserModel} */
-      const userModel = app.get('UserModel')
-
+  async create(req, res) {
+    await this._wrapHandler(req, res, async () => {
       const email = req.body.email
       if(!email || !/^\w+@\w+\.\w+$/.test(email) || !email.length > 500) {
         throw new ValidationError(`Email is not valid`)
       }
 
-      const user = await userModel.create({email})
+      const user = await this._userModel.create({email})
 
       res.writeHead(201, {'Content-type': 'application/json'})
       res.end(JSON.stringify({
@@ -36,18 +39,15 @@ class UserController {
     })
   }
 
-  static async getById(req, res) {
-    await UserController._wrapHandler(req, res, async () => {
-      /** @type {UserModel} */
-      const userModel = app.get('UserModel')
-
+  async getById(req, res) {
+    await this._wrapHandler(req, res, async () => {
       const id = req.params.id
 
       if(!id || !/\w+/.test(id)) {
         throw new ValidationError(`id is not valid!`)
       }
 
-      const user = await userModel.getById(id)
+      const user = await this._userModel.getById(id)
 
       res.writeHead(200, {'Content-type': 'application/json'})
       res.end(JSON.stringify({
@@ -57,29 +57,23 @@ class UserController {
     })
   }
 
-  static async deleteById(req, res) {
-    await UserController._wrapHandler(req, res, async () => {
-      /** @type {UserModel} */
-      const userModel = app.get('UserModel')
-
+  async deleteById(req, res) {
+    await this._wrapHandler(req, res, async () => {
       const id = req.params.id
 
       if(!id || !/\w+/.test(id)) {
         throw ValidationError(`id is not valid!`)
       }
 
-      const user = await userModel.deleteById(id)
+      const user = await this._userModel.deleteById(id)
 
       res.writeHead(200, {'Content-type': 'application/json'})
       res.end()
     })
   }
 
-  static async update(req, res) {
-    await UserController._wrapHandler(req, res, async () => {
-      /** @type {UserModel} */
-      const userModel = app.get('UserModel')
-
+  async update(req, res) {
+    await this._wrapHandler(req, res, async () => {
       const id = req.params.id
 
       if(!id || !/\w+/.test(id)) {
@@ -91,14 +85,14 @@ class UserController {
         throw new ValidationError(`Email is not valid`)
       }
 
-      await userModel.update(id, {email})
+      await this._userModel.update(id, {email})
 
       res.writeHead(204, {'Content-type': 'application/json'})
       res.end()
     })
   }
 
-  static async _wrapHandler(req, res, action) {
+  async _wrapHandler(req, res, action) {
     try {
       const result = action()
       if (result instanceof Promise) {

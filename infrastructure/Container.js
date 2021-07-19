@@ -47,39 +47,46 @@ class Container extends require('./contracts/IContainer') {
 
   /**
    * @param {string} key
+   * @param {string[]} resolvingStack
    * @return {any|*}
    */
-  get(key) {
+  get(key, {resolvingStack = []} = {}) {
     if (!this._resolvers[key]) {
-      throw new Error(`Unknown key ${key}`)
+      throw new Error(
+        `Cannot resolve ${resolvingStack.join(' > ')}${resolvingStack.length ? ' > ' : ''}${key}`
+      )
     }
 
     const resolver = this._resolvers[key]
+    let resolvedDeps = []
+    if(resolver.dependencies && resolver.dependencies.length > 0) {
+      resolvedDeps = this._resolveNested([...resolvingStack, key], resolver.dependencies)
+    }
 
     //singleton
     if (resolver.singleton) {
-      if (!resolver.origin) {
-        resolver.origin = resolver.value
-        resolver.value = new resolver.origin(...resolver.dependencies)
+      if (!resolver.singleton.origin) {
+        resolver.singleton.origin = resolver.value
+        resolver.value = new resolver.singleton.origin(...resolvedDeps)
       }
       return resolver.value
     }
 
     //byVal
-    if(resolver.setByValue) {
+    if (resolver.setByValue) {
       return resolver.value
     }
 
     //factory
-    if(resolver.setAsFactory) {
-      return  resolver.value(...resolver.dependencies)
+    if (resolver.setAsFactory) {
+      return resolver.value(...resolvedDeps)
     }
 
-    if(resolver.binding) {
-      return this.get(resolver.value)
+    if (resolver.binding) {
+      return this.get(resolver.value, {resolvingStack: [...resolvingStack, key]})
     }
 
-    return new resolver.value(...resolver.dependencies)
+    return new resolver.value(...resolvedDeps)
   }
 
   /**
@@ -88,13 +95,19 @@ class Container extends require('./contracts/IContainer') {
    */
   bind(key, destKey) {
     this._resolvers[key] = {
-      destKey,
+      value: destKey,
       singleton: false,
       setByValue: false,
       setAsFactory: false,
       binding: true,
       dependencies: [],
     }
+  }
+
+  _resolveNested(resolvingStack, deps) {
+    return deps.map(key => {
+      return this.get(key, {resolvingStack})
+    })
   }
 }
 

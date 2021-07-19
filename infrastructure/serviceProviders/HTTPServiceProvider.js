@@ -3,7 +3,7 @@ const fs = require('fs')
 /**
  * @extends {BasicServiceProvider}
  */
-class SystemProvider extends require(APP_PATH + '/infrastructure/contracts/BasicServiceProvider') {
+class HTTPServiceProvider extends require(APP_PATH + '/infrastructure/contracts/BasicServiceProvider') {
   /**
    * @param {IContainer} container
    */
@@ -20,27 +20,13 @@ class SystemProvider extends require(APP_PATH + '/infrastructure/contracts/Basic
     container.register('routeList', routeList).value()
 
     container.register('router', require(APP_PATH + '/infrastructure/Router'))
-      .dependencies('routeList')
+      .dependencies('container')
 
     container.register('frontController', require(APP_PATH + '/infrastructure/FrontController'))
-      .dependencies('router')
       .singleton()
-
-    container.register('mongoDBAccessor', require(APP_PATH + '/infrastructure/MongoDBAccessor'))
-      .dependencies('config')
-      .singleton()
-
-    container.bind('dbAccessor', 'mongoDBAccessor')
-
-    container.register('mongoDBAccessor', require(APP_PATH + '/infrastructure/MongoDBAccessor'))
-      .dependencies('config')
-      .singleton()
-
-    //ioc
-    // this._container['dbAccessor'] = new (require(APP_PATH + '/infrastructure/MongoDBAccessor'))(app.get('config'))
-    // this._container['UserModel'] = new (require(APP_PATH + '/app/models/UserModel'))(app.get('dbAccessor'))
 
     const frontController = container.get('frontController')
+
     container.register('http', require('http').createServer(frontController.handle.bind(frontController)))
       .value()
   }
@@ -49,8 +35,25 @@ class SystemProvider extends require(APP_PATH + '/infrastructure/contracts/Basic
    * @param {IContainer} container
    */
   boot(container) {
-    container.get('router').set('default', this._router.get('get **404'))
+    const routeList = container.get('routeList')
+    /** @type {Router} */
+    const router = container.get('router')
+    router.parse(routeList)
+
+    const frontController = container.get('frontController')
+    frontController.setRouter(router)
+
+    /** @type {NodeJS.EventEmitter} */
+    const bus = container.get('systemBus')
+    const logger = container.get('logger')
+
+    bus.on('app_start', () => {
+      //http listen
+      container.get('http').listen(process.env.PORT || 8080, process.env.HOST || 'localhost', () => {
+        logger.info('Server started. Listening...')
+      })
+    })
   }
 }
 
-module.exports = SystemProvider
+module.exports = HTTPServiceProvider

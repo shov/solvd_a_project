@@ -1,16 +1,5 @@
-const fs = require('fs')
 
 class App {
-  _routeList
-  _router
-  _http
-
-  /**
-   * @type {FrontController}
-   * @private
-   */
-  _frontController
-
   _sysProviders = []
 
   /**
@@ -28,6 +17,7 @@ class App {
      * @private
      */
     this._container = new (require(APP_PATH + '/infrastructure/Container'))()
+    this._container.register('container', this._container).value()
     this._container.register('logger', logger).value()
   }
 
@@ -39,31 +29,16 @@ class App {
       }
     }
 
-    //config
-    this._config = {}
-    this._container.register('config', this._config).value()
-
-    fs.readdirSync(APP_PATH + '/config')
-      .forEach(fileName => {
-        if (!/\.js$/.test(fileName)) {
-          return []
-        }
-        this._config[fileName.replace(/^(.*)?\/(\w+)\.js$/g, '$2').replace(/\.js/, '')] = require(APP_PATH + '/config/' + fileName)
-      })
-
     //system providers
-    fs.readdirSync(APP_PATH + '/infrastructure/serviceProviders')
-      .forEach(fileName => {
-        if (!/\.js$/.test(fileName)) {
-          return []
-        }
-        this._sysProviders.push(new (require(APP_PATH + '/config/' + fileName))())
-      })
+    this._sysProviders.push(new (require(APP_PATH + '/infrastructure/serviceProviders/SystemServiceProvider'))())
+    this._sysProviders.push(new (require(APP_PATH + '/infrastructure/serviceProviders/DataBaseServiceProvider'))())
+    this._sysProviders.push(new (require(APP_PATH + '/infrastructure/serviceProviders/HTTPServiceProvider'))())
 
     //Init sys providers
     this._sysProviders.forEach(provider => {
       provider.init(this._container)
     })
+    this._container.get('systemBus').emit('app_kick_user_providers_init')
 
     return this
   }
@@ -73,15 +48,13 @@ class App {
     this._sysProviders.forEach(provider => {
       provider.boot(this._container)
     })
+    this._container.get('systemBus').emit('app_kick_user_providers_boot')
 
     return this
   }
 
   start() {
-    //http listen
-    this._container.get('http').listen(process.env.PORT || 8080, process.env.HOST || 'localhost', () => {
-      this._logger.info('Server started. Listening...')
-    })
+    this._container.get('systemBus').emit('app_start')
   }
 
   get(reference) {

@@ -2,15 +2,24 @@ const glob = require('glob')
 const fs = require('fs')
 
 class DependencyInjector {
+  /**
+   * @param {Container} container
+   */
   constructor(container) {
+
+    /**
+     * @type {Container}
+     * @private
+     */
+    this._container = container
   }
 
-  parsePath(root, excludes = [], base = null) {
+  processPath(root, exclude = [], base = null) {
 
-    const candidates = []
+    const candidateList = []
     glob.sync(APP_PATH + root + '/**/*').forEach(filePath => {
-      for(let excludedPart of excludes) {
-        if(filePath.includes(excludedPart)) {
+      for (let excludedPart of exclude) {
+        if (filePath.includes(excludedPart)) {
           return
         }
       }
@@ -23,18 +32,24 @@ class DependencyInjector {
 
       const dependencies = []
       const content = fs.readFileSync(filePath).toString().trim()
-      const depExp = /@Inject\s*\(\s*(?<dep>[^\s].+)\s*\).*$/mg
+      const depExp = /@Inject\s*\(\s*(?<dep>[a-zA-Z][a-zA-Z0-9_.]+)\s*\).*$/mg
       content.replace(depExp, (_, dep) => {
         dependencies.push(dep.trim())
       })
 
       const reference = (base ? base + '.' : '') + matches.groups.reference.replace(/\//g, '.')
 
-      candidates.push({
+      candidateList.push({
         filePath,
         reference,
         dependencies
       })
+    })
+
+    candidateList.forEach(candidate => {
+      const constructor = require(candidate.filePath)
+      this._container.register(candidate.reference, constructor)
+        .dependencies(...candidate.dependencies)
     })
   }
 }

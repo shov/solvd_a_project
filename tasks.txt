@@ -3,3 +3,4 @@
 3 implement crud for user
 4 prepare to ioc
 5 start with tests, ioc
+6 finish ioc + di

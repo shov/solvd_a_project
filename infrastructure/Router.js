@@ -1,23 +1,35 @@
 class Router {
   _handlers = {}
+  /**
+   * @type {{method: string, path: string, resolver: {controller: string, action: string}}[]}
+   * @private
+   */
+  _routeList = {}
 
   /**
-   * @param {{method: string, path: string, resolver: {controller: string, action: string}}[]} routeList
+   * @param  {Container} container
    */
-  constructor(routeList) {
-    this._parse(routeList)
+  constructor(container) {
+    /**
+     * @type {Container}
+     * @private
+     */
+    this._container = container
+
+
   }
 
-  _parse(routeList) {
-    routeList.forEach(route => {
+  parse(routeList) {
+    this._routeList = routeList
+    this._routeList.forEach(route => {
       const sign = this.makeSign(route.method, route.path)
 
-      const controller = require(APP_PATH + '/app/http/controllers/' + route.resolver.controller)
+      const controller = this._container.get(route.resolver.controller)
       if ('function' !== typeof controller[route.resolver.action]) {
         throw new Error(`No action found for ${route.resolver.controller}`)
       }
 
-      this._handlers[sign] = controller[route.resolver.action]
+      this._handlers[sign] = controller[route.resolver.action].bind(controller)
     })
   }
 
