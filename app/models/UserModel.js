@@ -13,8 +13,10 @@ class UserModel {
   }
 
   async init() {
-    await this._dbAccessor.registerSchema(this._name, ['email'])
-    this._hadIntit = true
+    if(!this._hadIntit) {
+      await this._dbAccessor.registerSchema(this._name, ['email'])
+      this._hadIntit = true
+    }
   }
 
   async fetchAll() {
