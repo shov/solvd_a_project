@@ -4,3 +4,4 @@
 4 prepare to ioc
 5 start with tests, ioc
 6 finish ioc + di
+7 implement Auth, add express and middleware, add error handler

@@ -1,4 +1,6 @@
 const fs = require('fs')
+const expressFrontControllerFactory = require('express')
+const bodyParser = require('body-parser')
 
 /**
  * @extends {BasicServiceProvider}
@@ -22,13 +24,16 @@ class HTTPServiceProvider extends require(APP_PATH + '/infrastructure/contracts/
     container.register('router', require(APP_PATH + '/infrastructure/Router'))
       .dependencies('container')
 
-    container.register('frontController', require(APP_PATH + '/infrastructure/FrontController'))
-      .singleton()
+    const expressFrontController = expressFrontControllerFactory()
+    expressFrontController.use(bodyParser.json({limit: '2mb'}))
 
-    const frontController = container.get('frontController')
+    container.register('expressFrontController', expressFrontController).value()
 
-    container.register('http', require('http').createServer(frontController.handle.bind(frontController)))
+    container.register('http', require('http').createServer(expressFrontController))
       .value()
+
+    container.register('httpErrorHandler', require(APP_PATH + '/infrastructure/HTTPErrorHandler'))
+      .singleton()
   }
 
   /**
@@ -40,8 +45,8 @@ class HTTPServiceProvider extends require(APP_PATH + '/infrastructure/contracts/
     const router = container.get('router')
     router.parse(routeList)
 
-    const frontController = container.get('frontController')
-    frontController.setRouter(router)
+    const expressFrontController = container.get('expressFrontController')
+    expressFrontController.use(router.getExpressRouter())
 
     /** @type {NodeJS.EventEmitter} */
     const bus = container.get('systemBus')

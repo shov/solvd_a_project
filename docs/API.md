@@ -18,7 +18,7 @@ An error response body example
 
 ## Auth
 
-No Auth so far
+JWT token, `Authorization: Bearer <token>` header to be added
 
 ## End-points
 
@@ -63,11 +63,13 @@ Expected errors
 Request body example
 ```json
 {
-    "email":  "user@example.example"
+    "email":  "user@example.example",
+    "password": "12345678"
 }
 ```
 * `email` is a valid email
 * max `email` length is 500 chars
+* `password` contains A-Za-z0-9_ only, min 8 chars, max 30 chars
 
 Expected response `201 Created`
 ```json
@@ -110,3 +112,20 @@ Expected response `200 OK`
 Expected errors
 * 404 - not found
 
+### login | create a token
+`POST /api/v1/users/{id}/tokens`
+
+Request body example
+```json
+{
+    "password": "12345678"
+}
+```
+* `password` contains A-Za-z0-9_ only, min 8 chars, max 30 chars
+
+### logout | delete a token
+`DELETE /api/v1/tokens/{token}`
+
+* `tokenId` is a valid token id
+
+Expected response `200 OK`

@@ -7,19 +7,31 @@ module.exports = [
       action: 'home',
     },
   },
+
+  //Tokens
   {
-    method: 'get',
-    path: '**404',
+    method: 'post',
+    path: '/api/v1/users/:userId/tokens',
     resolver: {
-      controller: 'WelcomeController',
-      action: 'notFound',
-    },
+      controller: 'TokenController',
+      action: 'create',
+    }
   },
+  {
+    method: 'delete',
+    path: '/api/v1/tokens/:token',
+    resolver: {
+      controller: 'TokenController',
+      action: 'delete',
+    }
+  },
+
 
   // Users
   {
     method: 'get',
     path: '/api/v1/users',
+    // TODO roles
     resolver: {
       controller: 'UserController',
       action: 'list',
@@ -36,6 +48,7 @@ module.exports = [
   {
     method: 'get',
     path: '/api/v1/users/:id',
+    middleware: ['AuthMiddleware'],
     resolver: {
       controller: 'UserController',
       action: 'getById',
@@ -44,6 +57,7 @@ module.exports = [
   {
     method: 'delete',
     path: '/api/v1/users/:id',
+    middleware: ['AuthMiddleware'],
     resolver: {
       controller: 'UserController',
       action: 'deleteById',
@@ -52,10 +66,19 @@ module.exports = [
   {
     method: 'put',
     path: '/api/v1/users/:id',
+    middleware: ['AuthMiddleware'],
     resolver: {
       controller: 'UserController',
       action: 'update',
     }
   },
 
+  {
+    method: 'use',
+    path: '*',
+    resolver: {
+      controller: 'WelcomeController',
+      action: 'notFound',
+    },
+  },
 ]

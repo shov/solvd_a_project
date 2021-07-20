@@ -11,39 +11,48 @@ class UserController {
     this._userModel = userModel
   }
 
-  async list(req, res) {
-    await this._wrapHandler(req, res, async () => {
+  async list(req, res, next) {
+    try {
       const userList = await this._userModel.fetchAll()
 
       res.writeHead(200, {'Content-type': 'application/json'})
       res.end(JSON.stringify({
         users: userList.map(u => ({id: u.id, email: u.email}))
       }))
-    })
+    } catch (e) {
+      next(e)
+    }
   }
 
-  async create(req, res) {
-    await this._wrapHandler(req, res, async () => {
+  async create(req, res, next) {
+    try {
       const email = req.body.email
-      if(!email || !/^\w+@\w+\.\w+$/.test(email) || !email.length > 500) {
+      if (!email || !/^\w+@\w+\.\w+$/.test(email) || !email.length > 500) {
         throw new ValidationError(`Email is not valid`)
       }
 
-      const user = await this._userModel.create({email})
+      const password = req.body.password
+      if (!password || !/^\w{8,30}$/.test(password)) {
+        throw new ValidationError(`Password is not valid`)
+      }
+
+      const user = await this._userModel.create({email, password})
 
       res.writeHead(201, {'Content-type': 'application/json'})
       res.end(JSON.stringify({
         id: user.id,
         email: user.email,
       }))
-    })
+    } catch (e) {
+      next(e)
+    }
   }
 
-  async getById(req, res) {
-    await this._wrapHandler(req, res, async () => {
+  async getById(req, res, next) {
+    try {
       const id = req.params.id
 
-      if(!id || !/\w+/.test(id)) {
+      if (!id || !/\w+/.test(id)) {
         throw new ValidationError(`id is not valid!`)
       }
 
@@ -54,14 +63,16 @@ class UserController {
         id: user.id,
         email: user.email,
       }))
-    })
+    } catch (e) {
+      next(e)
+    }
   }
 
-  async deleteById(req, res) {
-    await this._wrapHandler(req, res, async () => {
+  async deleteById(req, res, next) {
+    try {
       const id = req.params.id
 
-      if(!id || !/\w+/.test(id)) {
+      if (!id || !/\w+/.test(id)) {
         throw ValidationError(`id is not valid!`)
       }
 
@@ -69,19 +80,21 @@ class UserController {
 
       res.writeHead(200, {'Content-type': 'application/json'})
       res.end()
-    })
+    } catch (e) {
+      next(e)
+    }
   }
 
-  async update(req, res) {
-    await this._wrapHandler(req, res, async () => {
+  async update(req, res, next) {
+    try {
       const id = req.params.id
 
-      if(!id || !/\w+/.test(id)) {
+      if (!id || !/\w+/.test(id)) {
         throw ValidationError(`id is not valid!`)
       }
 
       const email = req.body.email
-      if(!email || !/^\w+@\w+\.\w+$/.test(email) || !email.length > 500) {
+      if (!email || !/^\w+@\w+\.\w+$/.test(email) || !email.length > 500) {
         throw new ValidationError(`Email is not valid`)
       }
 
@@ -89,44 +102,8 @@ class UserController {
 
       res.writeHead(204, {'Content-type': 'application/json'})
       res.end()
-    })
-  }
-
-  async _wrapHandler(req, res, action) {
-    try {
-      const result = action()
-      if (result instanceof Promise) {
-        await result
-      }
     } catch (e) {
-      app.get('logger').error(e.message, e.stack)
-
-      if (e instanceof ValidationError) {
-        res.writeHead(400, {'Content-type': 'application/json'})
-        res.end(JSON.stringify({
-          error: {
-            msg: 'Validation error: ' + e.message || '?',
-          }
-        }))
-        return
-      }
-
-      if (e instanceof NotFoundError) {
-        res.writeHead(404, {'Content-type': 'application/json'})
-        res.end(JSON.stringify({
-          error: {
-            msg: 'NotFound error: ' + e.message || '?',
-          }
-        }))
-        return
-      }
-
-      res.writeHead(500, {'Content-type': 'application/json'})
-      res.end(JSON.stringify({
-        error: {
-          msg: 'Unknown error: ' + e.message || '?',
-        }
-      }))
+      next(e)
     }
   }
 }

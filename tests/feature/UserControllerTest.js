@@ -34,4 +34,20 @@ describe('UserController', () => {
     expect(!!response.body.id).toBe(true)
     expect({id: response.body.id, ...newUser}).toStrictEqual(response.body)
   })
+
+  it('get user negative', async () => {
+    //Arrange
+    const userId = 'asdfgasdfg12'
+    const expectedStatusCode = 404
+
+    //Act
+    const response = await request
+      .get(`/api/v1/users/${userId}`)
+      .send()
+
+    //Assert
+    expect(response.statusCode).toBe(expectedStatusCode)
+    expect(!!response.body.error).toBe(true)
+    expect(!!response.body.error.msg).toBe(true)
+  })
 })

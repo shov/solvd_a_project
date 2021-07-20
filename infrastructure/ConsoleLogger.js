@@ -12,6 +12,10 @@ class ConsoleLogger extends ILogger {
   info(...args) {
     console.info(...args)
   }
+
+  warn(...args) {
+    console.warn(...args)
+  }
 }
 
 module.exports = ConsoleLogger

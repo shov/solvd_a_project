@@ -27,13 +27,6 @@ class SystemServiceProvider extends require(APP_PATH + '/infrastructure/contract
     container.register('systemBus', bus).value()
     bus.setMaxListeners(300) // up to you
 
-    // DB
-    container.register('mongoDBAccessor', require(APP_PATH + '/infrastructure/MongoDBAccessor'))
-      .dependencies('config')
-      .singleton()
-
-    container.bind('dbAccessor', 'mongoDBAccessor')
-
     container.register('dependencyInjector', require(APP_PATH + '/infrastructure/DependencyInjector'))
       .dependencies('container')
       .singleton()
@@ -53,8 +46,6 @@ class SystemServiceProvider extends require(APP_PATH + '/infrastructure/contract
    * @param {IContainer} container
    */
   boot(container) {
-    container.get('router').set('default', container.get('router').get('get **404'))
-
     const bus = container.get('systemBus')
 
     // APP service providers

@@ -102,6 +102,21 @@ class MongoDBAccessor {
       await db.collection(name).deleteMany({})
     })
   }
+
+  async exec(action) {
+    //open
+    await this._client.connect()
+
+    const db = this._client.db(this._dbName)
+    const result = await Promise.resolve(action({db, client: this._client}))
+
+    //close
+    this._client.close().catch(e => {
+      app.get('logger').error(e.message || e)
+    })
+
+    return result
+  }
 }
 
 module.exports = MongoDBAccessor

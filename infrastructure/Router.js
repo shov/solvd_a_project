@@ -1,3 +1,5 @@
+const expressRouterFactory = require('express').Router
+
 class Router {
   _handlers = {}
   /**
@@ -16,76 +18,59 @@ class Router {
      */
     this._container = container
 
+    /**
+     * @type {Router}
+     * @private
+     */
+    this._expressRouter = expressRouterFactory()
 
   }
 
+  getExpressRouter() {
+    return this._expressRouter
+  }
+
   parse(routeList) {
+    const config = this._container.get('config')
     this._routeList = routeList
     this._routeList.forEach(route => {
-      const sign = this.makeSign(route.method, route.path)
+      this._ensureAllowedMethod(route.method)
 
       const controller = this._container.get(route.resolver.controller)
       if ('function' !== typeof controller[route.resolver.action]) {
         throw new Error(`No action found for ${route.resolver.controller}`)
       }
 
-      this._handlers[sign] = controller[route.resolver.action].bind(controller)
+      const beforeMiddleware = []
+      const afterMiddleware = []
+
+      if(config.http && Array.isArray(config.http.afterMiddleware)) {
+        config.http.afterMiddleware.forEach(mName => {
+          const middlewareObj = this._container.get(mName)
+          afterMiddleware.push(middlewareObj.handle.bind(middlewareObj))
+        })
+      }
+
+      if(Array.isArray(route.middleware)) {
+        route.middleware.forEach(mName => {
+          const middlewareObj = this._container.get(mName)
+          beforeMiddleware.push(middlewareObj.handle.bind(middlewareObj))
+        })
+      }
+
+      this._expressRouter[route.method](
+        route.path,
+        ...beforeMiddleware,
+        controller[route.resolver.action].bind(controller),
+        ...afterMiddleware
+      )
     })
   }
 
-  /**
-   *
-   * @param {string} sing
-   * @param {{}} req
-   * @return {function|null}
-   */
-  resolve(sing, req = {}) {
-    if (sing.includes('/:')) {
-      return this._handlers['default']
+  _ensureAllowedMethod(method) {
+    if (!['all', 'use', 'get', 'post', 'put', 'delete', 'options', 'head', 'patch',].includes(method)) {
+      throw new TypeError(`Unexpected method ${method}`)
     }
-
-    return this._handlers[sing] || this._resolveWithParams(sing, req) || null
-  }
-
-  makeSign(method, path) {
-    return `${method.toLowerCase()} ${path}`
-  }
-
-  set(sign, handler) {
-    this._handlers[sign] = handler
-  }
-
-  get(sign) {
-    return this._handlers[sign] || null
-  }
-
-  /**
-   * @param {string} sign
-   * @param {{}} req
-   * @private
-   */
-  _resolveWithParams(sign, req) {
-    //'get /api/v1/users/4545sdg5t2g2'
-    //'get /api/v1/users/:id'
-    const paramHandlers = Object.entries(this._handlers)
-      .filter(([sign, _]) => sign.includes('/:'))
-
-      for (let [patternSign, handler] of paramHandlers) {
-      const regExp = new RegExp(`^${patternSign.replace(/\//g, '\/').replace(/\/:(\w+)/, (_, sub) => {
-        return `\/(?<${sub}>\\w+)`
-      })}\/?$`)
-
-      const matches = sign.match(regExp)
-
-      if (!matches) {
-        continue
-      }
-
-      req.params = matches.groups
-      return handler
-    }
-
-    return null
   }
 
 }

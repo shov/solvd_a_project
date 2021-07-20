@@ -9,6 +9,10 @@ class ILogger {
   error(...args) {
     throw new Error('You must implement it')
   }
+
+  warn(...args) {
+    throw new Error('You must implement it')
+  }
 }
 
 module.exports = ILogger
