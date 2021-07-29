@@ -4,7 +4,7 @@ global.APP_PATH = nodePath.resolve(__dirname)
 
 //Logger
 /** @type {ILogger} */
-const logger = new (require(APP_PATH + '/infrastructure/ConsoleLogger'))()
+const logger = new (require(APP_PATH + '/infrastructure/Logger'))()
 
 //env
 require('dotenv').config({path: APP_PATH + '/.env'})

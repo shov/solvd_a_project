@@ -3,7 +3,7 @@ const crypto = require('crypto')
 const {ObjectId} = require("mongodb")
 
 class UserModel {
-  '@Inject (dbAccessor)'
+
   constructor(dbAccessor) {
     /**
      * @type {IDBAccessor}

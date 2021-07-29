@@ -1,5 +1,5 @@
 class TokenModel {
-  '@Inject (dbAccessor)'
+
 
   constructor(dbAccessor) {
     /**
