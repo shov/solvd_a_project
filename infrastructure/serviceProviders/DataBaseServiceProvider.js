@@ -19,7 +19,7 @@ class DataBaseServiceProvider extends require(APP_PATH + '/infrastructure/contra
             return this._mainConnection
           }
 
-          if (this._creds) {
+          if (!this._creds) {
             this._fillCreds()
           }
 

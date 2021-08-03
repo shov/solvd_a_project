@@ -3,8 +3,12 @@ const UnauthorizedError = require(APP_PATH + '/infrastructure/exceptions/Unautho
 
 class TokenController {
   '@Inject (app.services.TokenService)'
-  '@Inject (app.models.UserModel)'
-  constructor(tokenService, userModel) {
+  '@Inject (app.services.UserService)'
+  /**
+   * @param {TokenService} tokenService
+   * @param {UserService} userService
+   */
+  constructor(tokenService, userService) {
     /**
      * @type {TokenService}
      * @private
@@ -12,10 +16,10 @@ class TokenController {
     this._tokenService = tokenService
 
     /**
-     * @type {UserModel}
+     * @type {UserService}
      * @private
      */
-    this._userModel = userModel
+    this._userService = userService
   }
 
   async create(req, res, next) {
@@ -32,17 +36,15 @@ class TokenController {
       }
 
       //check
-      const passwordCorrect = this._userModel.checkPassword(id, password)
-      if(!passwordCorrect) {
+      const userDto = await this._userService.checkPassword(id, password)
+      if(!userDto) {
         throw new UnauthorizedError('Invalid credentials')
       }
 
       //create new token and return it
-      const token = await this._tokenService.create({id})
+      const tokenDto = await this._tokenService.create(userDto)
 
-      res.send(201, {
-        token
-      })
+      res.status(201).send({token: tokenDto.content})
     } catch (e) {
       next(e)
     }

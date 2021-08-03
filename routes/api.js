@@ -11,7 +11,7 @@ module.exports = [
   //Tokens
   {
     method: 'post',
-    path: '/api/v1/users/:userId/tokens',
+    path: '/api/v1/users/:userId(\\d+)/tokens',
     resolver: {
       controller: 'TokenController',
       action: 'create',
@@ -27,7 +27,7 @@ module.exports = [
   },
 
 
-  // Users
+  //Users
   {
     method: 'get',
     path: '/api/v1/users',
@@ -45,34 +45,34 @@ module.exports = [
       action: 'create',
     }
   },
-  {
-    method: 'get',
-    path: '/api/v1/users/:id',
-    middleware: ['AuthMiddleware'],
-    resolver: {
-      controller: 'UserController',
-      action: 'getById',
-    }
-  },
-  {
-    method: 'delete',
-    path: '/api/v1/users/:id',
-    middleware: ['AuthMiddleware'],
-    resolver: {
-      controller: 'UserController',
-      action: 'deleteById',
-    }
-  },
-  {
-    method: 'put',
-    path: '/api/v1/users/:id',
-    middleware: ['AuthMiddleware'],
-    resolver: {
-      controller: 'UserController',
-      action: 'update',
-    }
-  },
-
+  // {
+  //   method: 'get',
+  //   path: '/api/v1/users/:id(\\d+)',
+  //   middleware: ['AuthMiddleware'],
+  //   resolver: {
+  //     controller: 'UserController',
+  //     action: 'getById',
+  //   }
+  // },
+  // {
+  //   method: 'delete',
+  //   path: '/api/v1/users/:id(\\d+)',
+  //   middleware: ['AuthMiddleware'],
+  //   resolver: {
+  //     controller: 'UserController',
+  //     action: 'deleteById',
+  //   }
+  // },
+  // {
+  //   method: 'put',
+  //   path: '/api/v1/users/:id(\\d+)',
+  //   middleware: ['AuthMiddleware'],
+  //   resolver: {
+  //     controller: 'UserController',
+  //     action: 'update',
+  //   }
+  // },
+  //
   {
     method: 'use',
     path: '*',

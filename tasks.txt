@@ -6,3 +6,4 @@
 6 finish ioc + di
 7 implement Auth, add express and middleware, add error handler
 8 add logger, knex, migration manager
+9 add DAO, DTO, refactor users

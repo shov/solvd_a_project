@@ -1,15 +1,15 @@
 const jwt = require('jsonwebtoken')
 
 class TokenService {
-  '@Inject (app.models.TokenModel)'
+  '@Inject (app.repositories.TokenDAO)'
   '@Inject (config)'
   '@Inject (logger)'
-  constructor(tokenModel, config, logger) {
+  constructor(tokenDAO, config, logger) {
     /**
-     * @type {TokenModel}
+     * @type {TokenDAO}
      * @private
      */
-    this._tokenModel = tokenModel
+    this._tokenDAO = tokenDAO
 
     /**
      * @type {ILogger}
@@ -23,8 +23,8 @@ class TokenService {
   }
 
   /**
-   * @param {{id: string}} user
-   * @return {Promise<string>}
+   * @param {UserDTO} user
+   * @return {Promise<TokenDTO>}
    */
   async create(user) {
     const payload = {
@@ -34,32 +34,27 @@ class TokenService {
     }
 
     //create jwt
-    const token = jwt.sign(payload, this.SIGN)
+    const content = jwt.sign(payload, this.SIGN)
 
 
-    //save token to DB
-    this._tokenModel.create({token, active: true}).catch(e => {
-      this._logger.error(`Cannot persist token ${token}`)
-    })
-
-    //return token
-    return token
+    //save token to DB & return
+    return await this._tokenDAO.create({content, active: true, userId: user.id})
   }
 
   /**
-   * @param {string} token
+   * @param {string} tokenContent
    * @return {Promise<boolean|{sub: string}>}
    */
-  async verify(token) {
+  async verify(tokenContent) {
     let payload = false
     try {
-      payload = jwt.verify(token, this.SIGN, {ignoreExpiration: true})
+      payload = jwt.verify(tokenContent, this.SIGN, {ignoreExpiration: true})
     } catch (e) {
       return payload
     }
 
     //get from DB, make sure it's active
-    const tokenDTO = await this._tokenModel.get(token)
+    const tokenDTO = await this._tokenDAO.getByToken(tokenContent)
 
     if (!tokenDTO) {
       return false
@@ -72,8 +67,8 @@ class TokenService {
     //if expired then update in DB set inactive
     if (Date.now() > payload.exp) {
       tokenDTO.active = false
-      this._tokenModel.update(tokenDTO).catch(e => {
-        this._logger.error(`Cannot update token ${token}`)
+      this._tokenDAO.update(tokenDTO).catch(e => {
+        this._logger.error(`Cannot update token ${tokenContent}`)
       })
       return false
     }
@@ -81,8 +76,8 @@ class TokenService {
     return payload
   }
 
-  async delete(token) {
-    await this._tokenModel.delete(token)
+  async delete(tokenContent) {
+    await this._tokenDAO.deleteByToken(tokenContent)
   }
 }
 

@@ -1,5 +1,5 @@
 class TokenModel {
-
+// FIXME
 
   constructor(dbAccessor) {
     /**

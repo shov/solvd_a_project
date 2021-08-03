@@ -9,5 +9,5 @@ try {
     .boot()
     .start()
 } catch (e) {
-  app.get('logger').error(e)
+  app.get('logger').error(e.message || e, e.stack)
 }

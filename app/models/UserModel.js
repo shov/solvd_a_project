@@ -1,7 +1,7 @@
 const ValidationError = require(APP_PATH + '/infrastructure/exceptions/ValidationError')
 const crypto = require('crypto')
 const {ObjectId} = require("mongodb")
-
+// FIXME
 class UserModel {
 
   constructor(dbAccessor) {
