@@ -77,7 +77,7 @@ class TokenService {
   }
 
   async delete(tokenContent) {
-    await this._tokenDAO.deleteByToken(tokenContent)
+    await this._tokenDAO.deactivateByToken(tokenContent)
   }
 }
 

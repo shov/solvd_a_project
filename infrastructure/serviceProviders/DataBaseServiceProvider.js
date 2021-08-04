@@ -55,7 +55,7 @@ class DataBaseServiceProvider extends require(APP_PATH + '/infrastructure/contra
       return container.get('dbConnectionProvider').getConnection()
     }).factory()
 
-    container.register('migrationsManager', require(APP_PATH + '/infrastructure/MigrationsManager'))
+    container.register('migrationManager', require(APP_PATH + '/infrastructure/MigrationManager'))
       .dependencies('logger', 'config', 'dbConnectionProvider')
   }
 

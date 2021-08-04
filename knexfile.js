@@ -5,10 +5,10 @@ const app = require('./bootstrap')
 app.init().boot()
 
 /**
- * @type {MigrationsManager}
+ * @type {MigrationManager}
  */
-const migrationsManager = app.get('migrationsManager')
+const migrationManager = app.get('migrationManager')
 
-const knexConfig = migrationsManager.getMigrationConfig()
+const knexConfig = migrationManager.getMigrationConfig()
 
 module.exports = knexConfig

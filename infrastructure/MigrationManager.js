@@ -5,7 +5,7 @@ const knex = require('knex')
 /**
  * Handle migrations jobs
  */
-class MigrationsManager {
+class MigrationManager {
   /**
    * @param {ILogger} logger
    * @param {{}} config
@@ -69,4 +69,4 @@ class MigrationsManager {
   }
 }
 
-module.exports = MigrationsManager
+module.exports = MigrationManager

@@ -1,5 +1,8 @@
 'use strict'
 
+/**
+ * @class BasicDTO
+ */
 class BasicDTO {
 
   present() {

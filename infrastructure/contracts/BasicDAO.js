@@ -1,6 +1,8 @@
 'use strict'
 
-
+/**
+ * @class BasicDAO
+ */
 class BasicDAO {
   constructor(connection, tableName, dto) {
     /**

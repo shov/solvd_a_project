@@ -1,33 +1,34 @@
 require('../bootstrap')
 const supertest = require('supertest')
+const check = require('check-types')
 
 describe('UserController', () => {
   let request
 
-  /** @type {UserModel} */
-  let user
+  /** @type {MigrationManager} */
+  let migrationManager
 
   beforeAll(async () => {
     jest.setTimeout(100000)
     request = supertest(app.get('http'))
-    user = app.get('app.models.UserModel')
+    migrationManager = app.get('migrationManager')
   })
 
   beforeEach(async () => {
-    await user.removeAll()
+    await migrationManager.refresh()
   })
 
   it('create positive', async () => {
     //Arrange
     const newUser = {
-      email: 'test@test.com'
+      email: 'test@test.com',
     }
     const expectedStatusCode = 201
 
     //Act
     const response = await request
       .post('/api/v1/users')
-      .send(newUser)
+      .send({...newUser, password: 'xxxxxxxxxxxxx',})
 
     //Assert
     expect(response.statusCode).toBe(expectedStatusCode)
@@ -37,8 +38,8 @@ describe('UserController', () => {
 
   it('get user negative', async () => {
     //Arrange
-    const userId = 'asdfgasdfg12'
-    const expectedStatusCode = 404
+    const userId = '12'
+    const expectedStatusCode = 401
 
     //Act
     const response = await request
@@ -49,5 +50,38 @@ describe('UserController', () => {
     expect(response.statusCode).toBe(expectedStatusCode)
     expect(!!response.body.error).toBe(true)
     expect(!!response.body.error.msg).toBe(true)
+  })
+
+  it('login positive', async () => {
+    //Arrange
+    const email = 'xxx@xxx.xx'
+    const password = 'qwertyqwertyStrong11'
+
+    //Act
+    const createUserResp = await request
+      .post('/api/v1/users')
+      .send({email, password})
+
+    const userId = createUserResp.body.id
+    expect(!!userId).toBe(true)
+
+    const loginResp = await request
+      .post(`/api/v1/users/${userId}/tokens`)
+      .send({password})
+
+    const token = loginResp.body.token
+
+    expect(check.nonEmptyString(token)).toBe(true)
+
+    const getUserResponse = await request
+      .get(`/api/v1/users/${userId}`)
+      .set({'Authorization': `Bearer ${token}`})
+
+    //Assert
+    expect(getUserResponse.statusCode).toBe(200)
+    expect(getUserResponse.body).toStrictEqual({
+      id: userId,
+      email,
+    })
   })
 })

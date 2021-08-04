@@ -1,6 +1,8 @@
 const BasicDAO = require(APP_PATH + '/infrastructure/contracts/BasicDAO')
-const check = require('check-types')
 
+/**
+ * @extends BasicDAO
+ */
 class TokenDAO extends BasicDAO {
   '@Inject (dbConnection)'
   '@Inject (app.entities.UserDTO)'
@@ -70,11 +72,11 @@ class TokenDAO extends BasicDAO {
   }
 
   /**
-   * Delete record by token content
+   * Deactivate record by token content
    * @param tokenContent
    * @return {Promise<void>}
    */
-  async deleteByToken(tokenContent) {
+  async deactivateByToken(tokenContent) {
     await this._connection.table(this.TABLE_NAME)
       .update({active: false})
       .where({content: tokenContent})

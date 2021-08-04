@@ -2,6 +2,7 @@
 const crypto = require('crypto')
 const check = require('check-types')
 const ValidationError = require(APP_PATH + '/infrastructure/exceptions/ValidationError')
+const NotFoundError = require(APP_PATH + '/infrastructure/exceptions/NotFoundError')
 
 class UserService {
   '@Inject (app.repositories.UserDAO)'
@@ -59,6 +60,41 @@ class UserService {
   async checkPassword(id, password) {
     const hash = this._hashPassword(password)
     return await this._userDAO.findOneForHash({id, hash})
+  }
+
+  /**
+   * Returns user by id
+   * @param {string|number} id
+   * @return {Promise<UserDTO>}
+   */
+  async getById(id) {
+    const userDto = await this._userDAO.find(id)
+
+    if(!userDto) {
+      throw new NotFoundError(`User not found!`)
+    }
+
+    return userDto
+  }
+
+  /**
+   * Delete user
+   * @param {number|string} id
+   * @return {Promise<void>}
+   */
+  async deleteById(id) {
+    await this._userDAO.delete(id)
+  }
+
+  /**
+   * Update user
+   * @param {string|number} id
+   * @param {string} email
+   * @return {Promise<void>}
+   */
+  async update(id, {email}) {
+    const userDto = this._userDAO.makeDto({id, email})
+    await this._userDAO.update(userDto)
   }
 
   _hashPassword(password) {

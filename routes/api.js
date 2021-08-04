@@ -45,34 +45,34 @@ module.exports = [
       action: 'create',
     }
   },
-  // {
-  //   method: 'get',
-  //   path: '/api/v1/users/:id(\\d+)',
-  //   middleware: ['AuthMiddleware'],
-  //   resolver: {
-  //     controller: 'UserController',
-  //     action: 'getById',
-  //   }
-  // },
-  // {
-  //   method: 'delete',
-  //   path: '/api/v1/users/:id(\\d+)',
-  //   middleware: ['AuthMiddleware'],
-  //   resolver: {
-  //     controller: 'UserController',
-  //     action: 'deleteById',
-  //   }
-  // },
-  // {
-  //   method: 'put',
-  //   path: '/api/v1/users/:id(\\d+)',
-  //   middleware: ['AuthMiddleware'],
-  //   resolver: {
-  //     controller: 'UserController',
-  //     action: 'update',
-  //   }
-  // },
-  //
+  {
+    method: 'get',
+    path: '/api/v1/users/:id(\\d+)',
+    middleware: ['AuthMiddleware'],
+    resolver: {
+      controller: 'UserController',
+      action: 'getById',
+    }
+  },
+  {
+    method: 'delete',
+    path: '/api/v1/users/:id(\\d+)',
+    middleware: ['AuthMiddleware'],
+    resolver: {
+      controller: 'UserController',
+      action: 'deleteById',
+    }
+  },
+  {
+    method: 'put',
+    path: '/api/v1/users/:id(\\d+)',
+    middleware: ['AuthMiddleware'],
+    resolver: {
+      controller: 'UserController',
+      action: 'update',
+    }
+  },
+
   {
     method: 'use',
     path: '*',
