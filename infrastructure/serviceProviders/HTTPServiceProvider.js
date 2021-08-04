@@ -54,7 +54,7 @@ class HTTPServiceProvider extends require(APP_PATH + '/infrastructure/contracts/
 
     bus.on('app_start', () => {
       //http listen
-      container.get('http').listen(process.env.PORT || 8080, process.env.HOST || 'localhost', () => {
+      container.get('http').listen(process.env.PORT || 8080, () => {
         logger.info('Server started. Listening...')
       })
     })
