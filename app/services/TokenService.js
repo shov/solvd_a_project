@@ -27,8 +27,18 @@ class TokenService {
    * @return {Promise<TokenDTO>}
    */
   async create(user) {
+    //save token to DB & return
+    return await this._tokenDAO.create(this.emitToken(user.id))
+  }
+
+  /**
+   * Emit new token
+   * @param userId
+   * @return {TokenDTO}
+   */
+  emitToken(userId) {
     const payload = {
-      sub: user.id,
+      sub: userId,
       iat: Date.now(),
       exp: Date.now() + this.EXPIRATION_TERM,
     }
@@ -36,9 +46,7 @@ class TokenService {
     //create jwt
     const content = jwt.sign(payload, this.SIGN)
 
-
-    //save token to DB & return
-    return await this._tokenDAO.create({content, active: true, userId: user.id})
+    return this._tokenDAO.makeDto({content, active: true, userId})
   }
 
   /**

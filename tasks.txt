@@ -9,6 +9,10 @@
 9  add DAO, DTO, refactor users
 10 move everything on DAO-Service
 11 add some tests
+12 create a user along with a token
+
+
+
 12 implement reminders
 13 create a user along with a token
 14 add sending reminders

@@ -28,7 +28,7 @@ class HTTPErrorHandler {
       }
     }
 
-    res.send(statusCode, {
+    res.status(statusCode).send({
       error: {
         msg: e.message || '?',
       }

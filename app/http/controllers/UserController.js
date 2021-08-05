@@ -3,6 +3,7 @@ const ValidationError = require(APP_PATH + '/infrastructure/exceptions/Validatio
 
 class UserController {
   '@Inject (app.services.UserService)'
+
   constructor(userService) {
     /**
      * @type {UserService}
@@ -32,9 +33,9 @@ class UserController {
         throw new ValidationError(`Password is not valid`)
       }
 
-      const userDto = await this._userService.register({email, password})
+      const {userDto, tokenDto} = await this._userService.register({email, password})
 
-      res.status(201).send(userDto.present())
+      res.status(201).send({...userDto.present(), token: tokenDto.content})
 
     } catch (e) {
       next(e)

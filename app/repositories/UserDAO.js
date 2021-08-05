@@ -16,12 +16,13 @@ class UserDAO extends BasicDAO {
    * Create new user
    * @param {string} email
    * @param {string} hash
+   * @param {null|Transaction} transaction
    * @return {Promise<UserDTO>}
    */
-  async create({email, hash}) {
+  async create({email, hash}, {transaction = null} = {}) {
     const createdAt = new Date()
 
-    const result = await this._connection
+    const query = this._connection
       .table(this.TABLE_NAME)
       .insert({
         email,
@@ -29,6 +30,12 @@ class UserDAO extends BasicDAO {
         created_at: createdAt,
       })
       .returning('id')
+
+    if(transaction) {
+      query.transacting(transaction)
+    }
+
+    const result = await query
 
     return this.makeDto({id: result[0], hash, email, createdAt})
   }

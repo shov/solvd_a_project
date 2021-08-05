@@ -33,7 +33,8 @@ describe('UserController', () => {
     //Assert
     expect(response.statusCode).toBe(expectedStatusCode)
     expect(!!response.body.id).toBe(true)
-    expect({id: response.body.id, ...newUser}).toStrictEqual(response.body)
+    expect(!!response.body.token).toBe(true)
+    expect({id: response.body.id, token: response.body.token, ...newUser}).toStrictEqual(response.body)
   })
 
   it('get user negative', async () => {
@@ -65,11 +66,8 @@ describe('UserController', () => {
     const userId = createUserResp.body.id
     expect(!!userId).toBe(true)
 
-    const loginResp = await request
-      .post(`/api/v1/users/${userId}/tokens`)
-      .send({password})
-
-    const token = loginResp.body.token
+    const token = createUserResp.body.token
+    expect(!!token).toBe(true)
 
     expect(check.nonEmptyString(token)).toBe(true)
 

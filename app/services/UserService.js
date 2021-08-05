@@ -6,16 +6,32 @@ const NotFoundError = require(APP_PATH + '/infrastructure/exceptions/NotFoundErr
 
 class UserService {
   '@Inject (app.repositories.UserDAO)'
+  '@Inject (app.repositories.TokenDAO)'
+  '@Inject (app.services.TokenService)'
 
   /**
    * @param {UserDAO} userDAO
+   * @param {TokenDAO} tokenDAO
+   * @param {TokenService} tokenService
    */
-  constructor(userDAO) {
+  constructor(userDAO, tokenDAO, tokenService) {
     /**
      * @type {UserDAO}
      * @private
      */
     this._userDAO = userDAO
+
+    /**
+     * @type {TokenDAO}
+     * @private
+     */
+    this._tokenDAO = tokenDAO
+
+    /**
+     * @type {TokenService}
+     * @private
+     */
+    this._tokenService = tokenService
 
     /**
      * @type {string}
@@ -28,12 +44,21 @@ class UserService {
    * register new user
    * @param {string} email
    * @param {string} password
-   * @return {Promise<UserDTO>}
+   * @return {Promise<{userDto: UserDTO, tokenDto: TokenDTO}>}
    */
   async register({email, password}) {
+    let userDto = null
+    let tokenDto = null
     try {
-      const hash = this._hashPassword(password)
-      return await this._userDAO.create({email, hash})
+      return await this._userDAO.getConnection().transaction(async transaction => {
+
+        const hash = this._hashPassword(password)
+        userDto = await this._userDAO.create({email, hash}, {transaction})
+        tokenDto = this._tokenService.emitToken(userDto.id)
+        tokenDto = await this._tokenDAO.create(tokenDto, {transaction})
+
+        return {userDto, tokenDto}
+      })
     } catch (e) {
       if (check.nonEmptyString(e.message) && e.message.include('duplicate')) {
         throw  new ValidationError('Email duplication!')
@@ -70,7 +95,7 @@ class UserService {
   async getById(id) {
     const userDto = await this._userDAO.find(id)
 
-    if(!userDto) {
+    if (!userDto) {
       throw new NotFoundError(`User not found!`)
     }
 

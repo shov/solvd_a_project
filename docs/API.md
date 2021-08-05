@@ -75,7 +75,8 @@ Expected response `201 Created`
 ```json
 {
     "id": 1,
-    "email":  "user@example.example"
+    "email":  "user@example.example",
+    "token": "token here"
 }
 ```
 

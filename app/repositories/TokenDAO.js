@@ -16,12 +16,13 @@ class TokenDAO extends BasicDAO {
    * @param {string} content
    * @param {boolean} active
    * @param {number|string|null} userId
+   * @param {null|Transaction} transaction
    * @return {Promise<TokenDTO>}
    */
-  async create({content, active = true, userId}) {
+  async create({content, active = true, userId}, {transaction = null} = {}) {
     const createdAt = new Date()
 
-    const result = await this._connection
+    const query = this._connection
       .table(this.TABLE_NAME)
       .insert({
         content,
@@ -30,6 +31,12 @@ class TokenDAO extends BasicDAO {
         created_at: createdAt,
       })
       .returning('id')
+
+    if(transaction) {
+      query.transacting(transaction)
+    }
+
+    const result = await query
 
     return this.makeDto({id: result[0], content, active, userId, createdAt})
   }
