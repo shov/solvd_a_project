@@ -60,7 +60,7 @@ class UserService {
         return {userDto, tokenDto}
       })
     } catch (e) {
-      if (check.nonEmptyString(e.message) && e.message.include('duplicate')) {
+      if (check.nonEmptyString(e.message) && e.message.includes('duplicate')) {
         throw  new ValidationError('Email duplication!')
       }
 
