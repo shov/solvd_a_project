@@ -73,6 +73,16 @@ module.exports = [
     }
   },
 
+  //Reminders
+  {
+    method: 'post',
+    path: '/api/v1/users',
+    resolver: {
+      controller: 'ReminderController',
+      action: 'create',
+    }
+  },
+
   {
     method: 'use',
     path: '*',
